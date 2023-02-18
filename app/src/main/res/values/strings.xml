@@ -1,8 +1,12 @@
 <resources>
     <string name="app_name">FishDemoPictures</string>
-    <string name="CameraStart">カメラ起動</string>
     <string name="FishLibrary">魚図鑑</string>
     <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="camera_start">カメラへ</string>
     <string name="pictorial_book">魚図鑑へ</string>
     <string name="input_name">ここに名前を表示</string>
+    <string name="launch_camera">カメラ起動</string>
+    <string name="btn_pickimage">写真選択</string>
+    <string name="label_image">判別する</string>
+    <string name="text_insert">生物判定</string>
 </resources>

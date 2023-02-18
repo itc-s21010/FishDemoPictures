@@ -1,6 +1,7 @@
 package jp.ac.it_college.std.s21010.fishdemopictures
 
 import android.content.Intent
+import android.graphics.Camera
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import jp.ac.it_college.std.s21010.fishdemopictures.databinding.ActivityMainBinding
@@ -14,6 +15,10 @@ class MainActivity : AppCompatActivity() {
 
         binding.toPictorial.setOnClickListener {
             val intent = Intent(this, PictorialBookActivity::class.java)
+            startActivity(intent)
+        }
+        binding.toCamera.setOnClickListener {
+            val intent = Intent(this, CameraActivity::class.java)
             startActivity(intent)
         }
     }

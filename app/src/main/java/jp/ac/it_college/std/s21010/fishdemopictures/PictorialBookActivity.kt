@@ -1,13 +1,18 @@
 package jp.ac.it_college.std.s21010.fishdemopictures
 
+import android.app.Activity
 import android.content.Context
+import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.net.Uri
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.view.View
 import android.widget.Button
 import android.widget.ImageView
 import android.widget.TextView
+import androidx.activity.result.contract.ActivityResultContracts
 import com.google.mlkit.vision.common.InputImage
 import com.google.mlkit.vision.label.ImageLabeling
 import com.google.mlkit.vision.label.defaults.ImageLabelerOptions
@@ -18,11 +23,17 @@ class PictorialBookActivity : AppCompatActivity() {
     private lateinit var binding: ActivityPictorialBookBinding
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
         binding = ActivityPictorialBookBinding.inflate(layoutInflater)
-        setContentView(binding.root)
+        val view = binding.root
+        setContentView(view)
+
+        val btnListener = BtnListener()
+
+        binding.btnPickImage.setOnClickListener(btnListener)
 
         val img: ImageView = findViewById(R.id.imageToLabel)
-        val fileName = "img-2.jpg"
+        val fileName = "image/*"
         val bitmap: Bitmap? = assetsToBitmap(fileName)
         bitmap?.apply {
             img.setImageBitmap(this)
@@ -48,9 +59,30 @@ class PictorialBookActivity : AppCompatActivity() {
                     // Task failed with an exception
                     // ...
                 }
-
         }
     }
+
+    private inner class BtnListener: View.OnClickListener{
+        override fun onClick(v: View) {
+            when(v.id) {
+                binding.btnPickImage.id -> {
+                    val intent = Intent(Intent.ACTION_PICK)
+                    intent.type = "image/*"
+                    receivePicture.launch(intent)
+                }
+            }
+        }
+    }
+
+    private var pickimageUri: Uri? = null
+    private val receivePicture =
+        registerForActivityResult(
+            ActivityResultContracts.StartActivityForResult()
+        ){
+            if (it.resultCode == Activity.RESULT_OK) {
+                binding.imageToLabel.setImageURI(pickimageUri)
+            }
+        }
 }
 
 // extension function to get bitmap from assets
