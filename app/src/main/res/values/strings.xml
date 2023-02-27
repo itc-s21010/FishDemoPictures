@@ -7,6 +7,9 @@
     <string name="input_name">ここに名前を表示</string>
     <string name="launch_camera">カメラ起動</string>
     <string name="btn_pickimage">写真選択</string>
+    <string name="pictorial_value">分類する</string>
+    <string name="text_sign">ここに表示</string>
     <string name="label_image">判別する</string>
     <string name="text_insert">生物判定</string>
+    <string name="bunrui_text">HomoSapiens  98\n\hair  95\n\skin   93\n</string>
 </resources>

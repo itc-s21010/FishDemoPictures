@@ -8,19 +8,31 @@ import android.graphics.BitmapFactory
 import android.net.Uri
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.os.ParcelFileDescriptor
 import android.view.View
 import android.widget.Button
 import android.widget.ImageView
 import android.widget.TextView
+import androidx.activity.result.ActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import com.google.mlkit.vision.common.InputImage
 import com.google.mlkit.vision.label.ImageLabeling
 import com.google.mlkit.vision.label.defaults.ImageLabelerOptions
 import jp.ac.it_college.std.s21010.fishdemopictures.databinding.ActivityPictorialBookBinding
+import java.io.FileDescriptor
 import java.io.IOException
 
 class PictorialBookActivity : AppCompatActivity() {
     private lateinit var binding: ActivityPictorialBookBinding
+
+    private var resultLauncher = registerForActivityResult(
+        ActivityResultContracts.StartActivityForResult()
+    ) { result: ActivityResult ->
+        if (result.resultCode == RESULT_OK) {
+            val resultData = result.data
+            resultData?.let { openImage(it) }
+        }
+    }
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -28,68 +40,46 @@ class PictorialBookActivity : AppCompatActivity() {
         val view = binding.root
         setContentView(view)
 
-        val btnListener = BtnListener()
+        var textMessage = findViewById<TextView>(R.id.text_message)
 
-        binding.btnPickImage.setOnClickListener(btnListener)
+        var btnText = findViewById<Button>(R.id.btnTest)
 
-        val img: ImageView = findViewById(R.id.imageToLabel)
-        val fileName = "image/*"
-        val bitmap: Bitmap? = assetsToBitmap(fileName)
-        bitmap?.apply {
-            img.setImageBitmap(this)
+        btnText.setOnClickListener {
+            textMessage.setText(R.string.bunrui_text)
         }
-        val txtOutput : TextView = findViewById(R.id.txtOutput)
-        val btn: Button = findViewById(R.id.btnTest)
-        btn.setOnClickListener {
-            val labeler = ImageLabeling.getClient(ImageLabelerOptions.DEFAULT_OPTIONS)
-            val image = InputImage.fromBitmap(bitmap!!, 0)
-            var outputText = ""
-            labeler.process(image)
-                .addOnSuccessListener { labels ->
-                    // Task completed successfully
-                    for (label in labels) {
-                        val text = label.text
-                        val confidence = label.confidence
-                        outputText += "$text : $confidence\n"
-                        //val index = label.index
-                    }
-                    txtOutput.text = outputText
-                }
-                .addOnFailureListener { e ->
-                    // Task failed with an exception
-                    // ...
-                }
+
+        val button: Button = findViewById(R.id.btnPickImage)
+        button.setOnClickListener {
+            val intent = Intent(Intent.ACTION_OPEN_DOCUMENT)
+            intent.addCategory(Intent.CATEGORY_OPENABLE)
+            intent.type = "image/*"
+            resultLauncher.launch(intent)
         }
     }
 
-    private inner class BtnListener: View.OnClickListener{
-        override fun onClick(v: View) {
-            when(v.id) {
-                binding.btnPickImage.id -> {
-                    val intent = Intent(Intent.ACTION_PICK)
-                    intent.type = "image/*"
-                    receivePicture.launch(intent)
-                }
+
+    private fun openImage(resultData: Intent) {
+        var pfDescriptor: ParcelFileDescriptor? = null
+        val imageView = findViewById<ImageView>(R.id.imageToLabel)
+
+        try {
+            val uri: Uri? = resultData.data
+            pfDescriptor = uri?.let {
+                contentResolver.openFileDescriptor(it, "r") }
+            if (pfDescriptor != null) {
+                val fileDescriptor: FileDescriptor = pfDescriptor.fileDescriptor
+                val bmp = BitmapFactory.decodeFileDescriptor(fileDescriptor)
+                pfDescriptor.close()
+                imageView.setImageBitmap(bmp)
+            }
+        } catch (e: IOException) {
+            e.printStackTrace()
+        } finally {
+            try {
+                pfDescriptor?.close()
+            } catch (e: Exception) {
+                e.printStackTrace()
             }
         }
     }
-
-    private var pickimageUri: Uri? = null
-    private val receivePicture =
-        registerForActivityResult(
-            ActivityResultContracts.StartActivityForResult()
-        ){
-            if (it.resultCode == Activity.RESULT_OK) {
-                binding.imageToLabel.setImageURI(pickimageUri)
-            }
-        }
-}
-
-// extension function to get bitmap from assets
-fun Context.assetsToBitmap(fileName: String): Bitmap?{
-    return try {
-        with(assets.open(fileName)){
-            BitmapFactory.decodeStream(this)
-        }
-    } catch (e: IOException) { null }
 }

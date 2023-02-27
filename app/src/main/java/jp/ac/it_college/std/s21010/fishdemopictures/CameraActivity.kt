@@ -6,6 +6,7 @@ import android.net.Uri
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.provider.MediaStore
+import android.provider.MediaStore.Images.Media
 import android.text.format.DateFormat
 import androidx.activity.result.contract.ActivityResultContracts
 import jp.ac.it_college.std.s21010.fishdemopictures.databinding.ActivityCameraBinding
@@ -30,18 +31,16 @@ class CameraActivity : AppCompatActivity() {
             launchCamera()
         }
     }
-
     private fun launchCamera() {
-        val nowStr = DateFormat.format("yyyyMMddHHmmss", Date())
+        val nowStr = DateFormat.format("yyyMMddHmmss", Date())
 
-        val fileName = "CameraIntentSamplePhoto_${nowStr}.jpg"
+        val filename = "CameraIntentSamplePhoto_${nowStr}.jpg"
 
         val values = ContentValues()
 
-        values.put(MediaStore.Images.Media.TITLE, fileName)
+        values.put(MediaStore.Images.Media.TITLE, filename)
 
         values.put(MediaStore.Images.Media.MIME_TYPE, "image/jpeg")
-        imageUri = contentResolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values)
 
         val intent = Intent(MediaStore.ACTION_IMAGE_CAPTURE).apply {
             putExtra(MediaStore.EXTRA_OUTPUT, imageUri)
@@ -49,4 +48,5 @@ class CameraActivity : AppCompatActivity() {
 
         cameraResultContract.launch(intent)
     }
+
 }
